@@ -9,8 +9,14 @@ export const loginSchema = z
     email: z.string().email("Invalid email address"),
     password: z
       .string()
-      .min(MIN_PASSWORD_LENGTH, `Password must be at least ${MIN_PASSWORD_LENGTH} characters`)
-      .max(MAX_PASSWORD_LENGTH, `Password must be at most ${MAX_PASSWORD_LENGTH} characters`),
+      .min(
+        MIN_PASSWORD_LENGTH,
+        `Password must be at least ${MIN_PASSWORD_LENGTH} characters`,
+      )
+      .max(
+        MAX_PASSWORD_LENGTH,
+        `Password must be at most ${MAX_PASSWORD_LENGTH} characters`,
+      ),
   })
   .strict();
 
@@ -19,12 +25,21 @@ export const registerSchema = z
     name: z
       .string()
       .min(1, "Name is required")
-      .max(MAX_NAME_LENGTH, `Name must be at most ${MAX_NAME_LENGTH} characters`),
+      .max(
+        MAX_NAME_LENGTH,
+        `Name must be at most ${MAX_NAME_LENGTH} characters`,
+      ),
     email: z.string().email("Invalid email address"),
     password: z
       .string()
-      .min(MIN_PASSWORD_LENGTH, `Password must be at least ${MIN_PASSWORD_LENGTH} characters`)
-      .max(MAX_PASSWORD_LENGTH, `Password must be at most ${MAX_PASSWORD_LENGTH} characters`),
+      .min(
+        MIN_PASSWORD_LENGTH,
+        `Password must be at least ${MIN_PASSWORD_LENGTH} characters`,
+      )
+      .max(
+        MAX_PASSWORD_LENGTH,
+        `Password must be at most ${MAX_PASSWORD_LENGTH} characters`,
+      ),
     confirmPassword: z.string(),
   })
   .strict()

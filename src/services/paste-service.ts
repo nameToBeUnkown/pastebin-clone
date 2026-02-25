@@ -1,6 +1,10 @@
 import { prisma } from "@/src/lib/prisma";
 import { nanoid } from "nanoid";
-import type { CreatePasteInput } from "@/src/types/paste";
+import type {
+  CreatePasteInput,
+  PasteWithAuthor,
+  PaginatedPastes,
+} from "@/src/types/paste";
 import { EXPIRATION_MS } from "@/src/types/paste";
 
 const PASTE_ID_LENGTH = 10;
@@ -8,9 +12,7 @@ const RECENT_PASTES_LIMIT = 20;
 
 export async function createPaste(input: CreatePasteInput, authorId?: string) {
   const expirationMs = EXPIRATION_MS[input.expiration];
-  const expiresAt = expirationMs
-    ? new Date(Date.now() + expirationMs)
-    : null;
+  const expiresAt = expirationMs ? new Date(Date.now() + expirationMs) : null;
 
   const paste = await prisma.paste.create({
     data: {
@@ -27,7 +29,9 @@ export async function createPaste(input: CreatePasteInput, authorId?: string) {
   return paste;
 }
 
-export async function getPasteById(id: string) {
+export async function getPasteById(
+  id: string,
+): Promise<PasteWithAuthor | null> {
   const paste = await prisma.paste.findUnique({
     where: { id },
     include: { author: { select: { id: true, name: true } } },
@@ -52,7 +56,9 @@ export async function incrementPasteViews(id: string) {
   });
 }
 
-export async function getRecentPublicPastes(page: number = 1) {
+export async function getRecentPublicPastes(
+  page: number = 1,
+): Promise<PaginatedPastes> {
   const skip = (page - 1) * RECENT_PASTES_LIMIT;
 
   const [pastes, total] = await Promise.all([
@@ -82,7 +88,9 @@ export async function getRecentPublicPastes(page: number = 1) {
   };
 }
 
-export async function getUserPastes(userId: string) {
+export async function getUserPastes(
+  userId: string,
+): Promise<PasteWithAuthor[]> {
   const pastes = await prisma.paste.findMany({
     where: { authorId: userId },
     orderBy: { createdAt: "desc" },
@@ -125,17 +133,17 @@ export async function togglePasteVisibility(id: string, userId: string) {
   return updated;
 }
 
-export async function searchPastes(query: string, page: number = 1) {
+export async function searchPastes(
+  query: string,
+  page: number = 1,
+): Promise<PaginatedPastes> {
   const skip = (page - 1) * RECENT_PASTES_LIMIT;
 
   const [pastes, total] = await Promise.all([
     prisma.paste.findMany({
       where: {
         isPublic: true,
-        OR: [
-          { title: { contains: query } },
-          { content: { contains: query } },
-        ],
+        OR: [{ title: { contains: query } }, { content: { contains: query } }],
         AND: [
           {
             OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
@@ -150,10 +158,7 @@ export async function searchPastes(query: string, page: number = 1) {
     prisma.paste.count({
       where: {
         isPublic: true,
-        OR: [
-          { title: { contains: query } },
-          { content: { contains: query } },
-        ],
+        OR: [{ title: { contains: query } }, { content: { contains: query } }],
         AND: [
           {
             OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],

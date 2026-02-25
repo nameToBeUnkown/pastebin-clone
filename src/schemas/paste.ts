@@ -21,10 +21,10 @@ export const createPasteSchema = z
         `Content must be at most ${MAX_CONTENT_LENGTH} characters`,
       ),
     language: z.enum(SUPPORTED_LANGUAGES, {
-      errorMap: () => ({ message: "Invalid language selected" }),
+      error: "Invalid language selected",
     }),
     expiration: z.enum(["never", "10m", "1h", "1d", "7d", "30d"], {
-      errorMap: () => ({ message: "Invalid expiration selected" }),
+      error: "Invalid expiration selected",
     }),
   })
   .strict();

@@ -19,7 +19,7 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
   const parsed = loginSchema.safeParse(raw);
 
   if (!parsed.success) {
-    return { success: false, error: parsed.error.errors[0].message };
+    return { success: false, error: parsed.error.issues[0].message };
   }
 
   try {
@@ -51,7 +51,7 @@ export async function registerAction(
   const parsed = registerSchema.safeParse(raw);
 
   if (!parsed.success) {
-    return { success: false, error: parsed.error.errors[0].message };
+    return { success: false, error: parsed.error.issues[0].message };
   }
 
   try {

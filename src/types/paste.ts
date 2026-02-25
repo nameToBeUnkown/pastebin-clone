@@ -3,8 +3,15 @@ export interface Paste {
   title: string;
   content: string;
   language: string;
+  isPublic: boolean;
+  views: number;
   expiresAt: Date | null;
   createdAt: Date;
+  authorId: string | null;
+}
+
+export interface PasteWithAuthor extends Paste {
+  author: { id: string; name: string } | null;
 }
 
 export interface CreatePasteInput {
@@ -14,13 +21,11 @@ export interface CreatePasteInput {
   expiration: PasteExpiration;
 }
 
-export interface PasteResponse {
-  id: string;
-  title: string;
-  content: string;
-  language: string;
-  expiresAt: string | null;
-  createdAt: string;
+export interface PaginatedPastes {
+  pastes: PasteWithAuthor[];
+  total: number;
+  totalPages: number;
+  currentPage: number;
 }
 
 export type PasteExpiration = "never" | "10m" | "1h" | "1d" | "7d" | "30d";
