@@ -18,7 +18,9 @@
     ]
   },
   "dependencies": {
+    "@libsql/client": "^0.17.0",
     "@prisma/adapter-better-sqlite3": "^7.4.1",
+    "@prisma/adapter-libsql": "^7.4.1",
     "@prisma/client": "^7.4.1",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
