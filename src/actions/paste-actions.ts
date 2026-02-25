@@ -27,7 +27,7 @@ export async function createPasteAction(
   const parsed = createPasteSchema.safeParse(raw);
 
   if (!parsed.success) {
-    return { success: false, error: parsed.error.errors[0].message };
+    return { success: false, error: parsed.error.issues[0].message };
   }
 
   try {
