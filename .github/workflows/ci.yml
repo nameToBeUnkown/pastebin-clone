@@ -43,6 +43,8 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - run: pnpm prisma generate
+
       - run: pnpm test
 
   build:
@@ -63,7 +65,7 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: npx prisma generate
+      - run: pnpm prisma generate
 
       - run: pnpm build
         env:
