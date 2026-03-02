@@ -20,7 +20,7 @@ export async function createPaste(input: CreatePasteInput, authorId?: string) {
       title: input.title,
       content: input.content,
       language: input.language,
-      isPublic: !authorId ? true : true,
+      isPublic: input.isPublic,
       expiresAt,
       authorId: authorId ?? null,
     },

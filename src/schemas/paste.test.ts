@@ -7,6 +7,7 @@ describe("createPasteSchema", () => {
     content: "console.log('hello');",
     language: "javascript" as const,
     expiration: "never" as const,
+    isPublic: true,
   };
 
   it("accepts valid paste data", () => {
@@ -121,7 +122,7 @@ describe("createPasteSchema", () => {
   it("rejects extra unknown fields in strict mode", () => {
     const result = createPasteSchema.safeParse({
       ...validPaste,
-      isPublic: false,
+      malicious: "hacked",
     });
     expect(result.success).toBe(false);
   });
@@ -154,7 +155,33 @@ describe("createPasteSchema", () => {
     const result = createPasteSchema.safeParse(validPaste);
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data).toEqual(validPaste);
+      expect(result.data.title).toBe(validPaste.title);
+      expect(result.data.content).toBe(validPaste.content);
+      expect(result.data.language).toBe(validPaste.language);
+      expect(result.data.expiration).toBe(validPaste.expiration);
+      expect(result.data.isPublic).toBe(true);
+    }
+  });
+
+  it("coerces string 'true' to boolean for isPublic", () => {
+    const result = createPasteSchema.safeParse({
+      ...validPaste,
+      isPublic: "true",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.isPublic).toBe(true);
+    }
+  });
+
+  it("coerces string 'false' to boolean false for isPublic", () => {
+    const result = createPasteSchema.safeParse({
+      ...validPaste,
+      isPublic: "false",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.isPublic).toBe(false);
     }
   });
 });

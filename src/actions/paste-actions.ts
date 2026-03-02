@@ -22,6 +22,7 @@ export async function createPasteAction(
     content: formData.get("content"),
     language: formData.get("language"),
     expiration: formData.get("expiration"),
+    isPublic: formData.get("isPublic") ?? "true",
   };
 
   const parsed = createPasteSchema.safeParse(raw);

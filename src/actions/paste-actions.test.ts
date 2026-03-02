@@ -47,6 +47,7 @@ describe("createPasteAction", () => {
     content: "console.log('hi');",
     language: "javascript",
     expiration: "never",
+    isPublic: "true",
   };
 
   it("creates paste successfully with auth", async () => {

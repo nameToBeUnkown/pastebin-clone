@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useTransition, useState } from "react";
+import { useTransition, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { createPasteAction } from "@/src/actions/paste-actions";
 import {
@@ -14,8 +14,13 @@ export function CreatePasteForm() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isPublic, setIsPublic] = useState(true);
 
-  function handleSubmit(formData: FormData) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    formData.set("isPublic", String(isPublic));
+
     setErrors({});
     startTransition(async () => {
       const result = await createPasteAction(formData);
@@ -31,7 +36,7 @@ export function CreatePasteForm() {
   }
 
   return (
-    <form action={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div>
         <label
           htmlFor="title"
@@ -113,6 +118,32 @@ export function CreatePasteForm() {
           className="w-full rounded-lg border border-zinc-300 px-3 py-2 font-mono text-sm text-zinc-900 placeholder-zinc-400 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
           placeholder="Paste your code here..."
         />
+      </div>
+
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          role="switch"
+          aria-checked={!isPublic}
+          onClick={() => setIsPublic((prev) => !prev)}
+          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500/20 ${
+            !isPublic ? "bg-indigo-600" : "bg-zinc-300 dark:bg-zinc-600"
+          }`}
+        >
+          <span
+            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+              !isPublic ? "translate-x-5" : "translate-x-0"
+            }`}
+          />
+        </button>
+        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          {isPublic ? "Public" : "Private"}
+        </span>
+        <span className="text-xs text-zinc-400 dark:text-zinc-500">
+          {isPublic
+            ? "Visible to everyone on the homepage"
+            : "Only accessible via direct link"}
+        </span>
       </div>
 
       {errors.form && (

@@ -143,6 +143,7 @@ describe("Type interfaces compile-time checks", () => {
       content: "Content",
       language: "python",
       expiration: "1h",
+      isPublic: true,
     };
     expect(input.language).toBe("python");
   });
