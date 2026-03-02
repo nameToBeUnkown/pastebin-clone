@@ -19,6 +19,7 @@ export interface CreatePasteInput {
   content: string;
   language: string;
   expiration: PasteExpiration;
+  isPublic: boolean;
 }
 
 export interface PaginatedPastes {

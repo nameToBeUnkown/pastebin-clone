@@ -26,6 +26,10 @@ export const createPasteSchema = z
     expiration: z.enum(["never", "10m", "1h", "1d", "7d", "30d"], {
       error: "Invalid expiration selected",
     }),
+    isPublic: z.preprocess(
+      (val) => val === "true" || val === true,
+      z.boolean(),
+    ),
   })
   .strict();
 

@@ -51,6 +51,7 @@ describe("createPaste", () => {
       content: "console.log('hello');",
       language: "javascript",
       expiration: "never",
+      isPublic: true,
     });
 
     expect(prismaMock.paste.create).toHaveBeenCalledWith({
@@ -78,6 +79,7 @@ describe("createPaste", () => {
       content: "content",
       language: "javascript",
       expiration: "10m",
+      isPublic: true,
     });
 
     const callArg = prismaMock.paste.create.mock.calls[0][0];
@@ -98,6 +100,7 @@ describe("createPaste", () => {
         content: "content",
         language: "javascript",
         expiration: "never",
+        isPublic: true,
       },
       "user-123",
     );
@@ -114,6 +117,7 @@ describe("createPaste", () => {
       content: "C",
       language: "python",
       expiration: "1h",
+      isPublic: true,
     });
 
     const callArg = prismaMock.paste.create.mock.calls[0][0];
@@ -130,6 +134,7 @@ describe("createPaste", () => {
       content: "C",
       language: "python",
       expiration: "1d",
+      isPublic: true,
     });
 
     const callArg = prismaMock.paste.create.mock.calls[0][0];
