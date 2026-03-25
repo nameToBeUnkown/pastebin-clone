@@ -1,5 +1,6 @@
 "use server";
 
+import bcrypt from "bcryptjs";
 import { auth } from "@/src/lib/auth";
 import { createPasteSchema } from "@/src/schemas/paste";
 import {
@@ -8,6 +9,7 @@ import {
   getPasteById,
   togglePasteVisibility,
   verifyPastePassword,
+  updatePaste,
 } from "@/src/services/paste-service";
 
 export interface PasteActionResult {
@@ -137,5 +139,46 @@ export async function getPasteContentAction(
     return { success: false, error: "Failed to fetch content" };
   }
 }
+
+export async function updatePasteAction(
+  pasteId: string,
+  data: {
+    newPassword?: string;
+    newContent?: string;
+  },
+): Promise<PasteActionResult> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { success: false, error: "You must be logged in" };
+  }
+
+  try {
+    const paste = await getPasteById(pasteId);
+    if (!paste) return { success: false, error: "Paste not found" };
+
+    if (paste.authorId !== session.user.id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const updates: any = {};
+
+    if (data.newPassword !== undefined) {
+      updates.passwordHash = data.newPassword
+        ? await bcrypt.hash(data.newPassword, 10)
+        : null;
+    }
+
+    if (data.newContent !== undefined) {
+      updates.content = data.newContent;
+    }
+
+    await updatePaste(pasteId, updates);
+    return { success: true };
+  } catch {
+    return { success: false, error: "Failed to update paste" };
+  }
+}
+
 
 

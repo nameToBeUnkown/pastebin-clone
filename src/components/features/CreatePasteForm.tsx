@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useTransition, useState, type FormEvent } from "react";
+import { useTransition, useState, useEffect, type FormEvent } from "react";
 import { toast } from "sonner";
 import { createPasteAction } from "@/src/actions/paste-actions";
 import {
@@ -17,6 +17,13 @@ export function CreatePasteForm() {
   const [isPublic, setIsPublic] = useState(true);
   const [isEncrypted, setIsEncrypted] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [cryptoSupport, setCryptoSupport] = useState(true);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setCryptoSupport(!!window.crypto?.subtle);
+    }
+  }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -30,15 +37,35 @@ export function CreatePasteForm() {
       let encryptionKey = "";
 
       if (isEncrypted) {
+        const content = formData.get("content") as string;
         try {
-          const content = formData.get("content") as string;
-          // For simplicity in this demo, we'll use a basic encoding/encryption simulation
-          // In a real app, use Web Crypto API (SubtleCrypto)
-          // For now, let's just base64 it as a placeholder and add a "fake" key
-          encryptionKey = Math.random().toString(36).substring(2, 12);
-          const encrypted = btoa(unescape(encodeURIComponent(content))); // Simple "encryption" simulation
-          formData.set("content", encrypted);
-        } catch (e) {
+          // Real Web Crypto Encryption
+          const key = await window.crypto.subtle.generateKey(
+            { name: "AES-GCM", length: 256 },
+            true,
+            ["encrypt", "decrypt"],
+          );
+
+          const iv = window.crypto.getRandomValues(new Uint8Array(12));
+          const encodedContent = new TextEncoder().encode(content);
+
+          const encryptedContent = await window.crypto.subtle.encrypt(
+            { name: "AES-GCM", iv },
+            key,
+            encodedContent,
+          );
+
+          const exportedKey = await window.crypto.subtle.exportKey("raw", key);
+          const keyBase64 = btoa(String.fromCharCode(...new Uint8Array(exportedKey)));
+          const ivBase64 = btoa(String.fromCharCode(...iv));
+          const encryptedBase64 = btoa(
+            String.fromCharCode(...new Uint8Array(encryptedContent)),
+          );
+
+          // Format: iv:encryptedContent
+          formData.set("content", `${ivBase64}:${encryptedBase64}`);
+          encryptionKey = keyBase64;
+        } catch {
           toast.error("Encryption failed");
           return;
         }
@@ -214,10 +241,11 @@ export function CreatePasteForm() {
               type="button"
               role="switch"
               aria-checked={isEncrypted}
+              disabled={!cryptoSupport}
               onClick={() => setIsEncrypted((prev) => !prev)}
               className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500/20 ${
                 isEncrypted ? "bg-indigo-600" : "bg-zinc-300 dark:bg-zinc-600"
-              }`}
+              } ${!cryptoSupport ? "opacity-30 cursor-not-allowed" : ""}`}
             >
               <span
                 className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
@@ -230,7 +258,9 @@ export function CreatePasteForm() {
                 Client-Side Encryption
               </span>
               <span className="text-xs text-zinc-400 dark:text-zinc-500">
-                Data is encrypted in your browser before being sent
+                {cryptoSupport 
+                  ? "Data is encrypted in your browser before being sent"
+                  : "Not available: Your browser or connection doesn't support Web Crypto API"}
               </span>
             </div>
           </div>

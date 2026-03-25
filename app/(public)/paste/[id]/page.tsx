@@ -116,7 +116,8 @@ export default async function PastePage({
         language={paste.language}
         isEncrypted={paste.isEncrypted}
         hasPassword={!!paste.passwordHash}
-        initialContent={paste.passwordHash ? null : paste.content}
+        isOwner={isOwner}
+        initialContent={isOwner || !paste.passwordHash ? paste.content : null}
       />
     </div>
   );

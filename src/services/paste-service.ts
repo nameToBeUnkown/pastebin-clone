@@ -77,6 +77,14 @@ export async function verifyPastePassword(id: string, password: string) {
   return bcrypt.compare(password, paste.passwordHash);
 }
 
+export async function updatePaste(id: string, data: Partial<import("@prisma/client").Paste>) {
+  return prisma.paste.update({
+    where: { id },
+    data,
+  });
+}
+
+
 export async function incrementPasteViews(id: string) {
   const updated = await prisma.paste.update({
     where: { id },

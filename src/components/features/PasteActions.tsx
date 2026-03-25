@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import {
@@ -15,7 +14,6 @@ interface PasteActionsProps {
 }
 
 export function PasteActions({ pasteId, isPublic }: PasteActionsProps) {
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   function handleDelete() {
@@ -24,8 +22,8 @@ export function PasteActions({ pasteId, isPublic }: PasteActionsProps) {
 
       if (result.success) {
         toast.success("Paste deleted");
-        router.push("/dashboard");
-        router.refresh();
+        // Force redirect to dashboard
+        window.location.href = "/dashboard";
       } else {
         toast.error(result.error ?? "Failed to delete");
       }
@@ -40,7 +38,8 @@ export function PasteActions({ pasteId, isPublic }: PasteActionsProps) {
         toast.success(
           isPublic ? "Paste is now private" : "Paste is now public",
         );
-        router.refresh();
+        // We use window.location.reload() or router.refresh() but reload is cleaner for public/private toggle
+        window.location.reload();
       } else {
         toast.error(result.error ?? "Failed to update visibility");
       }
@@ -58,15 +57,16 @@ export function PasteActions({ pasteId, isPublic }: PasteActionsProps) {
         {isPublic ? (
           <>
             <EyeOff className="h-4 w-4" />
-            Make Private
+            <span className="hidden sm:inline">Make Private</span>
           </>
         ) : (
           <>
             <Eye className="h-4 w-4" />
-            Make Public
+            <span className="hidden sm:inline">Make Public</span>
           </>
         )}
       </button>
+
       <button
         onClick={handleDelete}
         disabled={isPending}
@@ -74,7 +74,7 @@ export function PasteActions({ pasteId, isPublic }: PasteActionsProps) {
         className="flex items-center gap-1.5 rounded-lg border border-red-300 px-3 py-1.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
       >
         <Trash2 className="h-4 w-4" />
-        Delete
+        <span className="hidden lg:inline">Delete</span>
       </button>
     </div>
   );
