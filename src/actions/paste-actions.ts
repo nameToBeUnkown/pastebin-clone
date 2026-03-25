@@ -161,7 +161,7 @@ export async function updatePasteAction(
       return { success: false, error: "Unauthorized" };
     }
 
-    const updates: any = {};
+    const updates: Partial<import("@prisma/client").Paste> = {};
 
     if (data.newPassword !== undefined) {
       updates.passwordHash = data.newPassword

@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Shield, X, Save, Lock } from "lucide-react";
+import { X, Save, Lock } from "lucide-react";
 import { updatePasteAction } from "@/src/actions/paste-actions";
 
 interface ChangePasswordDialogProps {

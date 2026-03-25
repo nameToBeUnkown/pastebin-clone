@@ -21,7 +21,8 @@ export function CreatePasteForm() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setCryptoSupport(!!window.crypto?.subtle);
+      const isSupported = !!window.crypto?.subtle;
+      setTimeout(() => setCryptoSupport(isSupported), 0);
     }
   }, []);
 

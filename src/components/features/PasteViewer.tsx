@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState, useTransition, useCallback } from "react";
 import { toast } from "sonner";
 import { Unlock, Globe, AlertTriangle, Key } from "lucide-react";
 import { CodeBlock } from "@/src/components/features/CodeBlock";
@@ -38,7 +38,7 @@ export function PasteViewer({
     setIsMounted(true);
   }, []);
 
-  async function performDecryption(keyBase64: string, showToast = false) {
+  const performDecryption = useCallback(async (keyBase64: string, showToast = false) => {
     if (!content) return false;
     try {
       const [ivBase64, encryptedBase64] = content.split(":");
@@ -66,8 +66,9 @@ export function PasteViewer({
       if (showToast) toast.error("Invalid decryption key");
       return false;
     }
-  }
+  }, [content]);
 
+  // Auto-decrypt if key in URL
   useEffect(() => {
     if (isMounted && content && isEncrypted && !isDecrypted) {
       const hash = window.location.hash;
@@ -76,7 +77,7 @@ export function PasteViewer({
         performDecryption(keyBase64);
       }
     }
-  }, [isMounted, content, isEncrypted, isDecrypted]);
+  }, [isMounted, content, isEncrypted, isDecrypted, performDecryption]);
 
   async function handleUnlock(e: React.FormEvent) {
     e.preventDefault();
