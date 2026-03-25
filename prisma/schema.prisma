@@ -7,12 +7,15 @@ datasource db {
 }
 
 model User {
-    id             String   @id @default(cuid())
-    email          String   @unique
+    id             String    @id @default(cuid())
+    email          String    @unique
     name           String
+    image          String?
+    bio            String?
     hashedPassword String
-    createdAt      DateTime @default(now())
+    createdAt      DateTime  @default(now())
     pastes         Paste[]
+    comments       Comment[]
 }
 
 model Paste {
@@ -29,8 +32,22 @@ model Paste {
     createdAt    DateTime  @default(now())
     authorId     String?
     author       User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+    comments     Comment[]
 
     @@index([authorId])
     @@index([createdAt])
     @@index([isPublic, createdAt])
+}
+
+model Comment {
+    id        String   @id @default(cuid())
+    content   String
+    createdAt DateTime @default(now())
+    pasteId   String
+    paste     Paste    @relation(fields: [pasteId], references: [id], onDelete: Cascade)
+    authorId  String
+    author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+    @@index([pasteId])
+    @@index([authorId])
 }

@@ -14,7 +14,10 @@ export interface Paste {
 }
 
 export interface PasteWithAuthor extends Paste {
-  author: { id: string; name: string } | null;
+  author: { id: string; name: string; image?: string | null } | null;
+  _count?: {
+    comments: number;
+  };
 }
 
 export interface CreatePasteInput {

@@ -55,15 +55,7 @@ export default async function DashboardPage() {
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {pastes.map((paste) => (
-            <PasteCard
-              key={paste.id}
-              id={paste.id}
-              title={paste.title}
-              language={paste.language}
-              createdAt={paste.createdAt}
-              views={paste.views}
-              author={paste.author}
-            />
+            <PasteCard key={paste.id} paste={paste} />
           ))}
         </div>
       )}

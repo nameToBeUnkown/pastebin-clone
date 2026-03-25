@@ -7,7 +7,9 @@ import {
 import { auth } from "@/src/lib/auth";
 import { PasteActions } from "@/src/components/features/PasteActions";
 import { PasteViewer } from "@/src/components/features/PasteViewer";
+import { CommentSection } from "@/src/components/features/CommentSection";
 import { Clock, Eye, User, Globe, Lock, ShieldCheck } from "lucide-react";
+import Link from "next/link";
 
 export async function generateMetadata({
   params,
@@ -69,7 +71,12 @@ export default async function PastePage({
             {paste.author && (
               <span className="flex items-center gap-1">
                 <User className="h-4 w-4" />
-                {paste.author.name}
+                <Link
+                  href={`/user/${paste.authorId}`}
+                  className="transition-colors hover:text-indigo-600"
+                >
+                  {paste.author.name}
+                </Link>
               </span>
             )}
             <span className="flex items-center gap-1">
@@ -85,10 +92,16 @@ export default async function PastePage({
                 </>
               )}
             </span>
+            {paste.isEncrypted && (
+              <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                <ShieldCheck className="h-4 w-4" />
+                Client-Side Encrypted
+              </span>
+            )}
             {paste.passwordHash && (
               <span className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400">
                 <ShieldCheck className="h-4 w-4" />
-                Password Protected
+                Server Password
               </span>
             )}
             {paste.expiresAt && (
@@ -117,8 +130,10 @@ export default async function PastePage({
         isEncrypted={paste.isEncrypted}
         hasPassword={!!paste.passwordHash}
         isOwner={isOwner}
-        initialContent={isOwner || !paste.passwordHash ? paste.content : null}
+        initialContent={!paste.passwordHash ? paste.content : null}
       />
+
+      <CommentSection pasteId={paste.id} />
     </div>
   );
 }

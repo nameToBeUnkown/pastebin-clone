@@ -43,9 +43,9 @@ export async function createPasteAction(
     content: formData.get("content"),
     language: formData.get("language"),
     expiration: formData.get("expiration"),
-    isPublic: formData.get("isPublic") ?? "true",
-    password: (formData.get("password") as string | null) ?? undefined,
-    viewLimit: (formData.get("viewLimit") as string | null) ?? undefined,
+    isPublic: formData.get("isPublic") === "true",
+    password: (formData.get("password") as string | null) || undefined,
+    viewLimit: (formData.get("viewLimit") as string | null) || undefined,
     isEncrypted: formData.get("isEncrypted") === "true",
   };
 
@@ -59,9 +59,9 @@ export async function createPasteAction(
     const session = await auth();
     const authorId = session?.user?.id;
 
-    const paste = await createPaste(parsed.data, authorId);
+    const id = await createPaste(parsed.data, authorId);
 
-    return { success: true, pasteId: paste.id };
+    return { success: true, pasteId: id };
   } catch (error) {
     if (error instanceof Error) {
       return { success: false, error: error.message };
@@ -173,7 +173,7 @@ export async function updatePasteAction(
       updates.content = data.newContent;
     }
 
-    await updatePaste(pasteId, updates);
+    await updatePaste(pasteId, session.user.id, updates);
     return { success: true };
   } catch {
     return { success: false, error: "Failed to update paste" };

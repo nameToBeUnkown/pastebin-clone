@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useTransition, useState, useEffect, type FormEvent } from "react";
 import { toast } from "sonner";
 import { createPasteAction } from "@/src/actions/paste-actions";
+import { bufferToBase64 } from "@/src/lib/utils";
 import {
   SUPPORTED_LANGUAGES,
   PASTE_EXPIRATION_LABELS,
@@ -57,11 +58,9 @@ export function CreatePasteForm() {
           );
 
           const exportedKey = await window.crypto.subtle.exportKey("raw", key);
-          const keyBase64 = btoa(String.fromCharCode(...new Uint8Array(exportedKey)));
-          const ivBase64 = btoa(String.fromCharCode(...iv));
-          const encryptedBase64 = btoa(
-            String.fromCharCode(...new Uint8Array(encryptedContent)),
-          );
+          const keyBase64 = bufferToBase64(exportedKey);
+          const ivBase64 = bufferToBase64(iv);
+          const encryptedBase64 = bufferToBase64(encryptedContent);
 
           // Format: iv:encryptedContent
           formData.set("content", `${ivBase64}:${encryptedBase64}`);
@@ -208,7 +207,7 @@ export function CreatePasteForm() {
               htmlFor="password"
               className="mb-1 block text-xs font-medium text-zinc-600 dark:text-zinc-400"
             >
-              Password Protection (Optional)
+              Server-Side Password Protection (Optional)
             </label>
             <input
               id="password"
