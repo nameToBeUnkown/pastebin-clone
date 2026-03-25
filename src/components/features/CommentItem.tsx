@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useTransition } from "react";
 import { deleteCommentAction } from "@/src/actions/comment-actions";
 import { toast } from "sonner";
@@ -31,9 +32,15 @@ export function CommentItem({ comment, currentUserId }: CommentItemProps) {
     <div className="group rounded-xl border border-zinc-100 bg-white p-4 shadow-sm transition-all hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/50 dark:hover:bg-zinc-900">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3">
-          <div className="h-10 w-10 overflow-hidden rounded-full bg-indigo-100 dark:bg-indigo-950/50 flex items-center justify-center text-indigo-600 font-bold overflow-hidden">
+          <div className="h-10 w-10 overflow-hidden rounded-full bg-indigo-100 dark:bg-indigo-950/50 flex items-center justify-center text-indigo-600 font-bold">
             {comment.author.image ? (
-              <img src={comment.author.image} alt={comment.author.name} className="h-full w-full object-cover" />
+              <Image 
+                src={comment.author.image} 
+                alt={comment.author.name} 
+                width={40} 
+                height={40} 
+                className="h-full w-full object-cover" 
+              />
             ) : (
               <span className="text-xs">{comment.author.name[0].toUpperCase()}</span>
             )}
