@@ -5,6 +5,9 @@ export interface Paste {
   language: string;
   isPublic: boolean;
   views: number;
+  viewLimit: number | null;
+  passwordHash: string | null;
+  isEncrypted: boolean;
   expiresAt: Date | null;
   createdAt: Date;
   authorId: string | null;
@@ -20,6 +23,9 @@ export interface CreatePasteInput {
   language: string;
   expiration: PasteExpiration;
   isPublic: boolean;
+  password?: string;
+  viewLimit?: number;
+  isEncrypted?: boolean;
 }
 
 export interface PaginatedPastes {

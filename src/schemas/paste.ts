@@ -30,6 +30,13 @@ export const createPasteSchema = z
       (val) => val === "true" || val === true,
       z.boolean(),
     ),
+    password: z.string().optional().or(z.literal("")),
+    viewLimit: z.preprocess(
+      (val) =>
+        val === "" || val === undefined || val === null ? undefined : Number(val),
+      z.number().min(0).max(1000).optional(),
+    ),
+    isEncrypted: z.boolean().default(false),
   })
   .strict();
 

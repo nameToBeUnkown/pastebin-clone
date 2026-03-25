@@ -1,5 +1,6 @@
 import { prisma } from "@/src/lib/prisma";
 import { nanoid } from "nanoid";
+import bcrypt from "bcryptjs";
 import type {
   CreatePasteInput,
   PasteWithAuthor,
@@ -14,6 +15,10 @@ export async function createPaste(input: CreatePasteInput, authorId?: string) {
   const expirationMs = EXPIRATION_MS[input.expiration];
   const expiresAt = expirationMs ? new Date(Date.now() + expirationMs) : null;
 
+  const passwordHash = input.password
+    ? await bcrypt.hash(input.password, 10)
+    : null;
+
   const paste = await prisma.paste.create({
     data: {
       id: nanoid(PASTE_ID_LENGTH),
@@ -22,6 +27,9 @@ export async function createPaste(input: CreatePasteInput, authorId?: string) {
       language: input.language,
       isPublic: input.isPublic,
       expiresAt,
+      viewLimit: input.viewLimit ?? null,
+      passwordHash,
+      isEncrypted: input.isEncrypted ?? false,
       authorId: authorId ?? null,
     },
   });
@@ -41,7 +49,14 @@ export async function getPasteById(
     return null;
   }
 
+  // Check expiration
   if (paste.expiresAt && paste.expiresAt < new Date()) {
+    await prisma.paste.delete({ where: { id } });
+    return null;
+  }
+
+  // Check view limit (self-destruct)
+  if (paste.viewLimit && paste.views >= paste.viewLimit) {
     await prisma.paste.delete({ where: { id } });
     return null;
   }
@@ -49,11 +64,37 @@ export async function getPasteById(
   return paste;
 }
 
+export async function verifyPastePassword(id: string, password: string) {
+  const paste = await prisma.paste.findUnique({
+    where: { id },
+    select: { passwordHash: true },
+  });
+
+  if (!paste || !paste.passwordHash) {
+    return true; // No password required
+  }
+
+  return bcrypt.compare(password, paste.passwordHash);
+}
+
+export async function updatePaste(id: string, data: Partial<import("@prisma/client").Paste>) {
+  return prisma.paste.update({
+    where: { id },
+    data,
+  });
+}
+
+
 export async function incrementPasteViews(id: string) {
-  await prisma.paste.update({
+  const updated = await prisma.paste.update({
     where: { id },
     data: { views: { increment: 1 } },
   });
+
+  // Check for immediate self-destruct if limit is reached
+  if (updated.viewLimit && updated.views >= updated.viewLimit) {
+    await prisma.paste.delete({ where: { id } });
+  }
 }
 
 export async function getRecentPublicPastes(
