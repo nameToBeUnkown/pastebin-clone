@@ -5,13 +5,32 @@ import { createPasteSchema } from "@/src/schemas/paste";
 import {
   createPaste,
   deletePaste,
+  getPasteById,
   togglePasteVisibility,
+  verifyPastePassword,
 } from "@/src/services/paste-service";
 
 export interface PasteActionResult {
   success: boolean;
   error?: string;
   pasteId?: string;
+}
+
+export async function verifyPastePasswordAction(
+  pasteId: string,
+  password: string,
+): Promise<PasteActionResult> {
+  try {
+    const isCorrect = await verifyPastePassword(pasteId, password);
+
+    if (!isCorrect) {
+      return { success: false, error: "Incorrect password" };
+    }
+
+    return { success: true };
+  } catch {
+    return { success: false, error: "Authentication failed" };
+  }
 }
 
 export async function createPasteAction(
@@ -23,6 +42,9 @@ export async function createPasteAction(
     language: formData.get("language"),
     expiration: formData.get("expiration"),
     isPublic: formData.get("isPublic") ?? "true",
+    password: (formData.get("password") as string | null) ?? undefined,
+    viewLimit: (formData.get("viewLimit") as string | null) ?? undefined,
+    isEncrypted: formData.get("isEncrypted") === "true",
   };
 
   const parsed = createPasteSchema.safeParse(raw);
@@ -87,3 +109,33 @@ export async function toggleVisibilityAction(
     return { success: false, error: "Failed to toggle visibility" };
   }
 }
+
+export async function getPasteContentAction(
+  pasteId: string,
+  password?: string,
+): Promise<{ success: boolean; content?: string; error?: string }> {
+  try {
+    const paste = await getPasteById(pasteId);
+
+    if (!paste) {
+      return { success: false, error: "Paste not found" };
+    }
+
+    if (paste.passwordHash) {
+      if (!password) {
+        return { success: false, error: "Password required" };
+      }
+
+      const isCorrect = await verifyPastePassword(pasteId, password);
+      if (!isCorrect) {
+        return { success: false, error: "Incorrect password" };
+      }
+    }
+
+    return { success: true, content: paste.content };
+  } catch {
+    return { success: false, error: "Failed to fetch content" };
+  }
+}
+
+

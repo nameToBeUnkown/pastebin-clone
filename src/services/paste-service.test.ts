@@ -11,6 +11,7 @@ import {
   deletePaste,
   togglePasteVisibility,
   searchPastes,
+  verifyPastePassword,
 } from "@/src/services/paste-service";
 
 vi.mock("nanoid", () => ({
@@ -32,6 +33,9 @@ const MOCK_PASTE = {
   language: "javascript",
   isPublic: true,
   views: 0,
+  viewLimit: null,
+  passwordHash: null,
+  isEncrypted: false,
   expiresAt: null,
   createdAt: NOW,
   authorId: null,
@@ -62,6 +66,9 @@ describe("createPaste", () => {
         language: "javascript",
         isPublic: true,
         expiresAt: null,
+        viewLimit: null,
+        passwordHash: null,
+        isEncrypted: false,
         authorId: null,
       },
     });
@@ -181,6 +188,37 @@ describe("getPasteById", () => {
     });
   });
 
+  it("deletes and returns null when view limit is reached", async () => {
+    const limitedPaste = {
+      ...MOCK_PASTE_WITH_AUTHOR,
+      viewLimit: 5,
+      views: 5,
+    };
+    prismaMock.paste.findUnique.mockResolvedValue(limitedPaste);
+    prismaMock.paste.delete.mockResolvedValue(limitedPaste);
+
+    const result = await getPasteById("abc1234567");
+
+    expect(result).toBeNull();
+    expect(prismaMock.paste.delete).toHaveBeenCalledWith({
+      where: { id: "abc1234567" },
+    });
+  });
+
+  it("returns paste when view limit not reached", async () => {
+    const limitedPaste = {
+      ...MOCK_PASTE_WITH_AUTHOR,
+      viewLimit: 5,
+      views: 4,
+    };
+    prismaMock.paste.findUnique.mockResolvedValue(limitedPaste);
+
+    const result = await getPasteById("abc1234567");
+
+    expect(result).toEqual(limitedPaste);
+    expect(prismaMock.paste.delete).not.toHaveBeenCalled();
+  });
+
   it("returns paste with future expiration", async () => {
     const futurePaste = {
       ...MOCK_PASTE_WITH_AUTHOR,
@@ -207,6 +245,21 @@ describe("incrementPasteViews", () => {
     expect(prismaMock.paste.update).toHaveBeenCalledWith({
       where: { id: "abc1234567" },
       data: { views: { increment: 1 } },
+    });
+  });
+
+  it("deletes paste when incrementing reaches view limit", async () => {
+    prismaMock.paste.update.mockResolvedValue({
+      ...MOCK_PASTE,
+      viewLimit: 1,
+      views: 1,
+    });
+    prismaMock.paste.delete.mockResolvedValue(MOCK_PASTE);
+
+    await incrementPasteViews("abc1234567");
+
+    expect(prismaMock.paste.delete).toHaveBeenCalledWith({
+      where: { id: "abc1234567" },
     });
   });
 });
@@ -412,5 +465,24 @@ describe("searchPastes", () => {
     expect(result.pastes).toEqual([]);
     expect(result.total).toBe(0);
     expect(result.totalPages).toBe(0);
+  });
+});
+
+describe("verifyPastePassword", () => {
+  it("returns true if no password is set", async () => {
+    prismaMock.paste.findUnique.mockResolvedValue({ passwordHash: null });
+
+    const result = await verifyPastePassword("id", "any");
+
+    expect(result).toBe(true);
+  });
+
+  it("returns false if password is wrong", async () => {
+    prismaMock.paste.findUnique.mockResolvedValue({
+      passwordHash: "wrong-hash",
+    });
+
+    const result = await verifyPastePassword("id", "secret");
+    expect(result).toBe(false);
   });
 });

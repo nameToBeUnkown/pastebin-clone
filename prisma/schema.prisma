@@ -16,16 +16,19 @@ model User {
 }
 
 model Paste {
-    id        String    @id
-    title     String
-    content   String
-    language  String
-    isPublic  Boolean   @default(true)
-    views     Int       @default(0)
-    expiresAt DateTime?
-    createdAt DateTime  @default(now())
-    authorId  String?
-    author    User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+    id           String    @id
+    title        String
+    content      String
+    language     String
+    isPublic     Boolean   @default(true)
+    views        Int       @default(0)
+    viewLimit    Int?
+    passwordHash String?
+    isEncrypted  Boolean   @default(false)
+    expiresAt    DateTime?
+    createdAt    DateTime  @default(now())
+    authorId     String?
+    author       User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
 
     @@index([authorId])
     @@index([createdAt])

@@ -5,9 +5,9 @@ import {
   incrementPasteViews,
 } from "@/src/services/paste-service";
 import { auth } from "@/src/lib/auth";
-import { CodeBlock } from "@/src/components/features/CodeBlock";
 import { PasteActions } from "@/src/components/features/PasteActions";
-import { Clock, Eye, User, Globe, Lock } from "lucide-react";
+import { PasteViewer } from "@/src/components/features/PasteViewer";
+import { Clock, Eye, User, Globe, Lock, ShieldCheck } from "lucide-react";
 
 export async function generateMetadata({
   params,
@@ -85,6 +85,12 @@ export default async function PastePage({
                 </>
               )}
             </span>
+            {paste.passwordHash && (
+              <span className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400">
+                <ShieldCheck className="h-4 w-4" />
+                Password Protected
+              </span>
+            )}
             {paste.expiresAt && (
               <span className="text-amber-600 dark:text-amber-400">
                 Expires:{" "}
@@ -104,7 +110,14 @@ export default async function PastePage({
         )}
       </div>
 
-      <CodeBlock content={paste.content} language={paste.language} />
+      <PasteViewer
+        id={paste.id}
+        title={paste.title}
+        language={paste.language}
+        isEncrypted={paste.isEncrypted}
+        hasPassword={!!paste.passwordHash}
+        initialContent={paste.passwordHash ? null : paste.content}
+      />
     </div>
   );
 }
