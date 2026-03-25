@@ -36,7 +36,10 @@ export const createPasteSchema = z
         val === "" || val === undefined || val === null ? undefined : Number(val),
       z.number().min(0).max(1000).optional(),
     ),
-    isEncrypted: z.boolean().default(false),
+    isEncrypted: z.preprocess(
+      (val) => val === "true" || val === true,
+      z.boolean(),
+    ).default(false),
   })
   .strict();
 

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { X, Save, Lock } from "lucide-react";
 import { updatePasteAction } from "@/src/actions/paste-actions";
+import { bufferToBase64 } from "@/src/lib/utils";
 
 interface ChangePasswordDialogProps {
   pasteId: string;
@@ -47,9 +48,9 @@ export function ChangePasswordDialog({
           );
 
           const exportedKey = await window.crypto.subtle.exportKey("raw", key);
-          const keyBase64 = btoa(String.fromCharCode(...new Uint8Array(exportedKey)));
-          const ivBase64 = btoa(String.fromCharCode(...iv));
-          const encryptedBase64 = btoa(String.fromCharCode(...new Uint8Array(encryptedContent)));
+          const keyBase64 = bufferToBase64(exportedKey);
+          const ivBase64 = bufferToBase64(iv);
+          const encryptedBase64 = bufferToBase64(encryptedContent);
 
           newContent = `${ivBase64}:${encryptedBase64}`;
           encryptionKey = keyBase64;

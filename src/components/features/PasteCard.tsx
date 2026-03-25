@@ -1,52 +1,56 @@
 import Link from "next/link";
-import { Clock, Eye, User, Code } from "lucide-react";
+import { Clock, Eye, User, Code, MessageSquare } from "lucide-react";
 
 interface PasteCardProps {
-  id: string;
-  title: string;
-  language: string;
-  createdAt: Date;
-  views: number;
-  author?: { name: string } | null;
+  paste: {
+    id: string;
+    title: string;
+    language: string;
+    createdAt: Date;
+    views: number;
+    author?: { name: string } | null;
+    _count?: {
+        comments: number;
+    }
+  };
 }
 
-export function PasteCard({
-  id,
-  title,
-  language,
-  createdAt,
-  views,
-  author,
-}: PasteCardProps) {
+export function PasteCard({ paste }: PasteCardProps) {
   return (
     <Link
-      href={`/paste/${id}`}
-      className="group block rounded-lg border border-zinc-200 bg-white p-4 transition-all hover:border-indigo-300 hover:shadow-md dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-indigo-700"
+      href={`/paste/${paste.id}`}
+      className="group block rounded-xl border border-zinc-200 bg-white p-5 transition-all hover:border-indigo-300 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-indigo-700"
     >
-      <div className="mb-2 flex items-start justify-between gap-2">
-        <h3 className="truncate text-sm font-semibold text-zinc-900 group-hover:text-indigo-600 dark:text-zinc-100 dark:group-hover:text-indigo-400">
-          {title}
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <h3 className="truncate text-base font-semibold text-zinc-900 group-hover:text-indigo-600 dark:text-zinc-100 dark:group-hover:text-indigo-400">
+          {paste.title}
         </h3>
-        <span className="flex shrink-0 items-center gap-1 rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+        <span className="flex shrink-0 items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400">
           <Code className="h-3 w-3" />
-          {language}
+          {paste.language}
         </span>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
-        <span className="flex items-center gap-1">
-          <Clock className="h-3 w-3" />
-          {formatTimeAgo(createdAt)}
-        </span>
-        <span className="flex items-center gap-1">
-          <Eye className="h-3 w-3" />
-          {views}
-        </span>
-        {author && (
-          <span className="flex items-center gap-1">
-            <User className="h-3 w-3" />
-            {author.name}
-          </span>
+      <div className="flex flex-wrap items-center gap-4 text-xs text-zinc-500 dark:text-zinc-400">
+        <div className="flex items-center gap-1.5">
+          <Clock className="h-3.5 w-3.5" />
+          <span>{formatTimeAgo(new Date(paste.createdAt))}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Eye className="h-3.5 w-3.5" />
+          <span>{paste.views.toLocaleString()}</span>
+        </div>
+        {paste._count && (
+          <div className="flex items-center gap-1.5">
+            <MessageSquare className="h-3.5 w-3.5" />
+            <span>{paste._count.comments}</span>
+          </div>
+        )}
+        {paste.author && (
+          <div className="flex items-center gap-1.5 ml-auto">
+            <User className="h-3.5 w-3.5" />
+            <span className="font-medium">{paste.author.name}</span>
+          </div>
         )}
       </div>
     </Link>
@@ -60,7 +64,8 @@ function formatTimeAgo(date: Date): string {
   const HOUR = 3600;
   const DAY = 86400;
 
-  if (seconds < MINUTE) return "just now";
+  if (seconds < 10) return "just now";
+  if (seconds < MINUTE) return `${seconds}s ago`;
   if (seconds < HOUR) return `${Math.floor(seconds / MINUTE)}m ago`;
   if (seconds < DAY) return `${Math.floor(seconds / HOUR)}h ago`;
   return `${Math.floor(seconds / DAY)}d ago`;

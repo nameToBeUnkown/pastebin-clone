@@ -15,6 +15,9 @@ export const prismaMock = {
     delete: vi.fn(),
     count: vi.fn(),
   },
+  comment: {
+    deleteMany: vi.fn(),
+  },
 };
 
 vi.mock("@/src/lib/prisma", () => ({

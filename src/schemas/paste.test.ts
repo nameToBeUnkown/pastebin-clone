@@ -129,24 +129,28 @@ describe("createPasteSchema", () => {
 
   it("rejects missing title", () => {
     const { title: _, ...noTitle } = validPaste;
+    void _;
     const result = createPasteSchema.safeParse(noTitle);
     expect(result.success).toBe(false);
   });
 
   it("rejects missing content", () => {
     const { content: _, ...noContent } = validPaste;
+    void _;
     const result = createPasteSchema.safeParse(noContent);
     expect(result.success).toBe(false);
   });
 
   it("rejects missing language", () => {
     const { language: _, ...noLang } = validPaste;
+    void _;
     const result = createPasteSchema.safeParse(noLang);
     expect(result.success).toBe(false);
   });
 
   it("rejects missing expiration", () => {
     const { expiration: _, ...noExp } = validPaste;
+    void _;
     const result = createPasteSchema.safeParse(noExp);
     expect(result.success).toBe(false);
   });
