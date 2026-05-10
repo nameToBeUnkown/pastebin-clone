@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "PasteBin Clone",
-    template: "%s | PasteBin Clone",
+    default: "Pastify",
+    template: "%s | Pastify",
   },
   description:
     "Share code snippets with syntax highlighting and expiration support",

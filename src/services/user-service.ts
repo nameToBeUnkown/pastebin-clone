@@ -94,3 +94,19 @@ export async function getPastesByAuthorId(userId: string, isOwner = false) {
     },
   });
 }
+
+export async function updateUserProfile(
+  userId: string,
+  data: { name?: string; bio?: string | null; image?: string | null },
+) {
+  return await prisma.user.update({
+    where: { id: userId },
+    data,
+    select: {
+      id: true,
+      name: true,
+      bio: true,
+      image: true,
+    },
+  });
+}

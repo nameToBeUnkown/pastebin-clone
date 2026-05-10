@@ -6,7 +6,7 @@ describe("Footer", () => {
   it("renders copyright text", () => {
     render(<Footer />);
 
-    expect(screen.getByText(/PasteBin Clone/)).toBeInTheDocument();
+    expect(screen.getByText(/Pastify/)).toBeInTheDocument();
   });
 
   it("displays current year", () => {
