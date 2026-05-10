@@ -1,6 +1,13 @@
 import Link from "next/link";
 import { auth, signOut } from "@/src/lib/auth";
-import { Code, LogIn, LogOut, LayoutDashboard, PlusCircle } from "lucide-react";
+import {
+  Code,
+  LogIn,
+  LogOut,
+  LayoutDashboard,
+  PlusCircle,
+  Settings,
+} from "lucide-react";
 
 export async function Navbar() {
   const session = await auth();
@@ -13,7 +20,7 @@ export async function Navbar() {
           className="flex items-center gap-2 text-xl font-bold text-zinc-900 transition-colors hover:text-indigo-600 dark:text-zinc-100 dark:hover:text-indigo-400"
         >
           <Code className="h-6 w-6" />
-          <span>PasteBin</span>
+          <span>Pastify</span>
         </Link>
 
         <div className="flex items-center gap-2 sm:gap-4">
@@ -33,6 +40,13 @@ export async function Navbar() {
               >
                 <LayoutDashboard className="h-4 w-4" />
                 <span className="hidden sm:inline">Dashboard</span>
+              </Link>
+              <Link
+                href="/dashboard/settings"
+                className="flex items-center gap-1.5 rounded-lg border border-zinc-300 px-3 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              >
+                <Settings className="h-4 w-4" />
+                <span className="hidden sm:inline">Settings</span>
               </Link>
               <form
                 action={async () => {
