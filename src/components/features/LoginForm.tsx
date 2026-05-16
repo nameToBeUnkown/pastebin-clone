@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useTransition, useState, type FormEvent } from "react";
 import { toast } from "sonner";
+import { signIn } from "next-auth/react";
+import { Github } from "lucide-react";
 import { loginAction } from "@/src/actions/auth-actions";
 
 export function LoginForm() {
@@ -77,6 +79,26 @@ export function LoginForm() {
         className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isPending ? "Signing in..." : "Sign In"}
+      </button>
+
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-zinc-300 dark:border-zinc-700" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white px-2 text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">
+            or continue with
+          </span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
+        className="flex w-full items-center justify-center gap-2 rounded-lg border border-zinc-300 px-4 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+      >
+        <Github className="h-5 w-5" />
+        Sign in with GitHub
       </button>
     </form>
   );
