@@ -37,35 +37,43 @@ export function PasteViewer({
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
   }, []);
+
+  async function decryptContent(
+    encryptedContent: string,
+    keyBase64: string,
+  ): Promise<string> {
+    const [ivBase64, encryptedBase64] = encryptedContent.split(":");
+    if (!ivBase64 || !encryptedBase64) throw new Error("Invalid format");
+
+    const keyData = base64ToBuffer(keyBase64);
+    const iv = base64ToBuffer(ivBase64);
+    const encryptedData = base64ToBuffer(encryptedBase64);
+
+    const key = await window.crypto.subtle.importKey(
+      "raw",
+      keyData.buffer as ArrayBuffer,
+      "AES-GCM",
+      false,
+      ["decrypt"],
+    );
+
+    const decrypted = await window.crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: iv.buffer as ArrayBuffer },
+      key,
+      encryptedData.buffer as ArrayBuffer,
+    );
+
+    return new TextDecoder().decode(decrypted);
+  }
 
   const performDecryption = useCallback(
     async (keyBase64: string, showToast = false) => {
       if (!content) return false;
       try {
-        const [ivBase64, encryptedBase64] = content.split(":");
-        if (!ivBase64 || !encryptedBase64) throw new Error("Invalid format");
-
-        const keyData = base64ToBuffer(keyBase64);
-        const iv = base64ToBuffer(ivBase64);
-        const encryptedData = base64ToBuffer(encryptedBase64);
-
-        const key = await window.crypto.subtle.importKey(
-          "raw",
-          keyData.buffer as ArrayBuffer,
-          "AES-GCM",
-          false,
-          ["decrypt"]
-        );
-
-        const decrypted = await window.crypto.subtle.decrypt(
-          { name: "AES-GCM", iv: iv.buffer as ArrayBuffer },
-          key,
-          encryptedData.buffer as ArrayBuffer
-        );
-
-        const decoded = new TextDecoder().decode(decrypted);
+        const decoded = await decryptContent(content, keyBase64);
         setContent(decoded);
         setIsDecrypted(true);
         if (showToast) toast.success("Decrypted successfully!");
@@ -85,6 +93,7 @@ export function PasteViewer({
       const hash = window.location.hash;
       if (hash.startsWith("#key=")) {
         const keyBase64 = hash.replace("#key=", "");
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         performDecryption(keyBase64);
       }
     }
@@ -97,6 +106,20 @@ export function PasteViewer({
       if (result.success && result.content) {
         setContent(result.content);
         setIsLocked(false);
+
+        if (isEncrypted) {
+          const hash = window.location.hash;
+          if (hash.startsWith("#key=")) {
+            const keyBase64 = hash.replace("#key=", "");
+            try {
+              const decrypted = await decryptContent(result.content, keyBase64);
+              setContent(decrypted);
+              setIsDecrypted(true);
+            } catch {
+              // Auto-decrypt failed; user can use manual decrypt input
+            }
+          }
+        }
       } else {
         toast.error(result.error ?? "Invalid password");
       }
@@ -212,8 +235,6 @@ export function PasteViewer({
         {showPasswordDialog && (
           <ChangePasswordDialog
             pasteId={id}
-            isEncrypted={isEncrypted}
-            decryptedContent={content ?? undefined}
             onClose={() => setShowPasswordDialog(false)}
           />
         )}
@@ -263,8 +284,6 @@ export function PasteViewer({
       {showPasswordDialog && (
         <ChangePasswordDialog
           pasteId={id}
-          isEncrypted={isEncrypted}
-          decryptedContent={content ?? undefined}
           onClose={() => setShowPasswordDialog(false)}
         />
       )}

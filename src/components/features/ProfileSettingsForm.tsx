@@ -7,6 +7,7 @@ import { updateProfileAction } from "@/src/actions/user-actions";
 
 type ProfileSettingsFormProps = {
   user: {
+    id: string;
     name: string;
     bio?: string | null;
     image?: string | null;
@@ -129,6 +130,32 @@ export function ProfileSettingsForm({ user }: ProfileSettingsFormProps) {
           ) : (
             <p className="mt-1 text-sm italic text-zinc-400">No bio provided</p>
           )}
+        </div>
+
+        <div className="w-full rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
+          <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+            Share Profile
+          </h4>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              readOnly
+              value={`${typeof window !== "undefined" ? window.location.origin : ""}/user/${user.id}`}
+              className="min-w-0 flex-1 truncate rounded-lg border border-zinc-300 bg-white px-3 py-2 text-xs text-zinc-600 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-400"
+              onClick={(e) => e.currentTarget.select()}
+            />
+            <button
+              type="button"
+              onClick={() => {
+                const url = `${window.location.origin}/user/${user.id}`;
+                navigator.clipboard.writeText(url);
+                toast.success("Profile link copied!");
+              }}
+              className="shrink-0 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-indigo-700"
+            >
+              Copy
+            </button>
+          </div>
         </div>
       </div>
     </form>
