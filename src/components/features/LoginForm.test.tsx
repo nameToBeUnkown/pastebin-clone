@@ -16,7 +16,7 @@ describe("LoginForm", () => {
     render(<LoginForm />);
     expect(screen.getByPlaceholderText("you@example.com")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /Sign In/i }),
+      screen.getByRole("button", { name: "Sign In" }),
     ).toBeInTheDocument();
   });
 
@@ -28,7 +28,7 @@ describe("LoginForm", () => {
     fireEvent.change(emailInput, { target: { value: "test@example.com" } });
     fireEvent.change(pwdInput, { target: { value: "password123" } });
 
-    fireEvent.click(screen.getByRole("button", { name: /Sign In/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Sign In" }));
 
     await waitFor(() => {
       expect(authActions.loginAction).toHaveBeenCalled();

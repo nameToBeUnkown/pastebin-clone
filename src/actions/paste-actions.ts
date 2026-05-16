@@ -1,5 +1,6 @@
 "use server";
 
+import type { Paste } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { auth } from "@/src/lib/auth";
 import { createPasteSchema } from "@/src/schemas/paste";
@@ -161,7 +162,7 @@ export async function updatePasteAction(
       return { success: false, error: "Unauthorized" };
     }
 
-    const updates: Partial<import("@prisma/client").Paste> = {};
+    const updates: Partial<Paste> = {};
 
     if (data.newPassword !== undefined) {
       updates.passwordHash = data.newPassword

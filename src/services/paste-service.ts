@@ -3,6 +3,7 @@ import { nanoid } from "nanoid";
 import bcrypt from "bcryptjs";
 import type {
   CreatePasteInput,
+  Paste,
   PasteWithAuthor,
   PaginatedPastes,
 } from "@/src/types/paste";
@@ -243,7 +244,7 @@ export async function togglePasteVisibility(id: string, userId: string) {
 export async function updatePaste(
   id: string,
   userId: string,
-  data: Partial<import("@/src/types/paste").Paste>
+  data: Partial<Paste>
 ) {
   const paste = await prisma.paste.findUnique({ where: { id } });
 

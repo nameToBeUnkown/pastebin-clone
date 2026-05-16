@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import GitHub from "next-auth/providers/github";
 import { compare } from "bcryptjs";
 import { prisma } from "@/src/lib/prisma";
 import { loginSchema } from "@/src/schemas/auth";
@@ -11,6 +12,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/login",
   },
   providers: [
+    GitHub({
+      clientId: process.env.GITHUB_CLIENT_ID!,
+      clientSecret: process.env.GITHUB_SECRET!,
+      async profile(profile) {
+        const user = await prisma.user.upsert({
+          where: { email: profile.email! },
+          update: { name: profile.name ?? profile.login, image: profile.avatar_url },
+          create: {
+            email: profile.email!,
+            name: profile.name ?? profile.login,
+            image: profile.avatar_url,
+          },
+        });
+        return { id: user.id, email: user.email, name: user.name, image: user.image };
+      },
+    }),
     Credentials({
       name: "credentials",
       credentials: {
@@ -31,7 +48,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           where: { email: parsed.data.email },
         });
 
-        if (!user) {
+        if (!user || !user.hashedPassword) {
           return null;
         }
 
