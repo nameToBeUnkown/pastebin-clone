@@ -143,7 +143,7 @@ export async function getPasteContentAction(
 export async function updatePasteAction(
   pasteId: string,
   data: {
-    newPassword?: string;
+    newPassword?: string | null;
     newContent?: string;
   },
 ): Promise<PasteActionResult> {

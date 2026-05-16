@@ -5,19 +5,14 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { X, Save, Lock } from "lucide-react";
 import { updatePasteAction } from "@/src/actions/paste-actions";
-import { bufferToBase64 } from "@/src/lib/utils";
 
 interface ChangePasswordDialogProps {
   pasteId: string;
-  isEncrypted: boolean;
-  decryptedContent?: string;
   onClose: () => void;
 }
 
 export function ChangePasswordDialog({
   pasteId,
-  isEncrypted,
-  decryptedContent,
   onClose,
 }: ChangePasswordDialogProps) {
   const router = useRouter();
@@ -28,46 +23,12 @@ export function ChangePasswordDialog({
     e.preventDefault();
     startTransition(async () => {
       try {
-        let newContent: string | undefined = undefined;
-        let encryptionKey = "";
-
-        if (isEncrypted && decryptedContent) {
-          // PROD READY: Re-encrypt content with NEW key
-          const key = await window.crypto.subtle.generateKey(
-            { name: "AES-GCM", length: 256 },
-            true,
-            ["encrypt", "decrypt"],
-          );
-
-          const iv = window.crypto.getRandomValues(new Uint8Array(12));
-          const encodedContent = new TextEncoder().encode(decryptedContent);
-          const encryptedContent = await window.crypto.subtle.encrypt(
-            { name: "AES-GCM", iv },
-            key,
-            encodedContent,
-          );
-
-          const exportedKey = await window.crypto.subtle.exportKey("raw", key);
-          const keyBase64 = bufferToBase64(exportedKey);
-          const ivBase64 = bufferToBase64(iv);
-          const encryptedBase64 = bufferToBase64(encryptedContent);
-
-          newContent = `${ivBase64}:${encryptedBase64}`;
-          encryptionKey = keyBase64;
-        }
-
         const result = await updatePasteAction(pasteId, {
-          newPassword: password || undefined,
-          newContent,
+          newPassword: password || null,
         });
 
         if (result.success) {
           toast.success(password ? "Password updated" : "Password removed");
-          if (encryptionKey) {
-            // Update the URL hash with the NEW encryption key
-            window.location.hash = `#key=${encryptionKey}`;
-            toast.info("Encryption key updated. Link is now different!");
-          }
           router.refresh();
           onClose();
         } else {
@@ -109,13 +70,6 @@ export function ChangePasswordDialog({
               autoFocus
             />
           </div>
-
-          {isEncrypted && (
-            <div className="rounded-lg bg-amber-50 p-3 text-xs text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
-              <p className="font-bold mb-1">Note:</p>
-              Since this paste is encrypted, saving changes will generate a **NEW** encryption key and update your URL link.
-            </div>
-          )}
 
           <div className="flex items-center gap-3 pt-2">
             <button
